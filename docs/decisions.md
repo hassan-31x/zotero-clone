@@ -1,0 +1,13 @@
+# Implementation decisions
+
+- Original product name: Margin. Calm light surfaces, Geist typography, amber actions and familiar navigation. The reader uses an Overleaf-inspired persistent PDF / study split, with a keyboard-accessible resize handle and a mobile pane switcher.
+- One Next.js application, official MongoDB driver, disk storage adapter and an ingestion worker. No external identity provider, hosted vector database, seeded catalog or mocked AI.
+- Opaque random sessions and recovery keys, hashed on the server. Secure cookies on HTTPS deployments; origin validation protects mutations. Session secrets are unnecessary for unguessable 256-bit database-backed tokens.
+- Membership is checked server-side for each library and paper access. Personal records are user scoped. Shared note edits require the library's write role and the current version. Annotation changes remain author-only; viewers may add comments and annotations.
+- The guarded downloader validates every redirect, resolves all DNS addresses and rejects reserved/private destinations. It pins a validated address for the connection to prevent DNS rebinding, with port, size and timeout limits.
+- Durable MongoDB jobs have leases and can be reclaimed after interruption. Next.js after() also processes jobs in a single local instance. Compose runs a worker against the same queue. Local files are content-addressed by raw PDF SHA-256, while paper metadata and access remain library scoped.
+- PDF.js versions are pinned consistently with react-pdf. The reader renders a single high-DPI page at a time, so a 100-page PDF never allocates 100 canvases. Page navigation is explicit rather than continuous scroll. Built-in PDF outline/internal links, real text selection and normalized annotation geometry are supported.
+- Lexical page retrieval provides a free fallback. OpenRouter receives selected evidence snippets and recent turns when invoked. Unsupported page citations are marked unverified. Charts reject numeric values absent from retrieved evidence; this is a guardrail, not scientific validation of model interpretations.
+- Notes use robust plain Markdown with explicit save and optimistic version checks. They provide a template, preview, page backlinks, conflict recovery, and Markdown export. CRDT co-editing is outside the MVP.
+- Quizzes and flashcards show source-backed answers for self assessment. They do not claim objective automatic grading.
+- External discovery is feature flagged and uses Crossref metadata. Local recommendations show the tags / interest match. Publisher references without an accessible PDF are saved as metadata with an upload fallback.

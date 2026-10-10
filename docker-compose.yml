@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      target: runner
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/research_workspace
+      UPLOAD_DIR: /app/data/uploads
+    volumes:
+      - uploads:/app/data/uploads
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+  worker:
+    build:
+      context: .
+      target: worker
+    env_file: .env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/research_workspace
+      UPLOAD_DIR: /app/data/uploads
+    volumes:
+      - uploads:/app/data/uploads
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+  mongo:
+    image: mongo:8.0
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+volumes:
+  mongo-data:
+  uploads:
